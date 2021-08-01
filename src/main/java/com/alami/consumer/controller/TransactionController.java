@@ -1,5 +1,7 @@
 package com.alami.consumer.controller;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alami.consumer.dto.controller.response.Response;
+import com.alami.consumer.dto.transaction.TransactionMemberKoperasiResponseDto;
 import com.alami.consumer.model.transaction.TransactionMemberKoperasi;
 import com.alami.consumer.repository.transaction.TransactionMemberKoperasiRepository;
 import com.alami.consumer.repository.transaction.TransactionMemberKoperasiRepositoryCustom;
@@ -54,10 +57,24 @@ public class TransactionController {
 	}
 
 	@RequestMapping(path = "/list", method = RequestMethod.GET)
-	public Response<List<TransactionMemberKoperasi>> listbymember(@RequestParam(value="memberId", required = true)String memberId) {
+	public Response<List<TransactionMemberKoperasiResponseDto>> listbymember(@RequestParam(value="memberId", required = true)String memberId) {
+		DecimalFormat df = new DecimalFormat("#");
+		List<TransactionMemberKoperasiResponseDto> listResponseDto = new ArrayList<TransactionMemberKoperasiResponseDto>();
+		
 		List<TransactionMemberKoperasi> listTransaction = transactionMemberKoperasiRepositoryCustom.getListTransactionByMember(memberId);
 		
-		Response<List<TransactionMemberKoperasi>> response = new Response<List<TransactionMemberKoperasi>>(listTransaction);
+		for(TransactionMemberKoperasi data : listTransaction) {
+			TransactionMemberKoperasiResponseDto responseDto = new TransactionMemberKoperasiResponseDto();
+			responseDto.setMemberId(data.getMemberId());
+			responseDto.setMemberName(data.getMemberName());
+			responseDto.setTotalTransactionMemberKoperasi(df.format(data.getTotalTransactionMemberKoperasi()));
+			responseDto.setTransactionDateMemberKoperasi(data.getTransactionDateMemberKoperasi());
+			responseDto.setTransactionMemberKoperasiId(data.getTransactionMemberKoperasiId());
+			responseDto.setTransactionTypeMemberKoperasi(data.getTransactionTypeMemberKoperasi());
+			
+			listResponseDto.add(responseDto);
+		}
+		Response<List<TransactionMemberKoperasiResponseDto>> response = new Response<List<TransactionMemberKoperasiResponseDto>>(listResponseDto);
 		return response;
 	}
 }
